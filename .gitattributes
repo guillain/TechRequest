@@ -1,0 +1,6 @@
+conf/* linguist-vendored
+log/* linguist-vendored
+TechRequest/static/js/* linguist-vendored
+TechRequest/static/css/* linguist-vendored
+TechRequest/static/image/* linguist-vendored
+TechRequest/templates/* linguist-vendored
