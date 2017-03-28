@@ -1,0 +1,37 @@
+{% extends "index.html" %}
+
+{% block view %}
+        <view>
+          <h2>View</h2>
+          <span>{{ session.sname }}</span>
+          <br />
+          <div id="viewDiv">
+            <ul id="viewRes" class="view">
+              {% for mess in data['items'] %}
+              {% if 'text' in mess %}
+              <li id="msg{{ mess['id'] }}" onmouseover="onmouseoveragent(this)" onmouseout="onmouseoutagent(this)">
+                <span>{{ mess['created'] }} : {{ mess['text'] }}</span>
+                <div class="hideme">
+                  <ul>
+                    <li>From : {{ mess['personEmail'] }}</li>
+                    <li>personId : {{ mess['personId'] }}</li>
+                    <li>toPersonEmail : {{ mess['toPersonEmail'] }}</li>
+                    <li>toPersonId : {{ mess['topersonId'] }}</li>
+                    <li>id : {{ mess['roomId'] }}</li>
+                    <li>roomId : {{ mess['roomId'] }}</li>
+                    <li>roomType : {{ mess['roomType'] }}</li>
+                    <li>text : {{ mess['text'] }}</li>
+                    <li>markdown : {{ mess['markdown'] }}</li>
+                    <li>files : {{ mess['files'] }}</li>
+                    <li>created : {{ mess['created'] }}
+                    <li>mentionedPeople : {{ mess['mentionedPeople'] }}</li>
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+              {% endfor %}
+            </ul>
+          </div> <!-- /viewDiv -->
+        </view>
+{% endblock %}
+

@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+
+{% block new %}
+        <new>
+          <h2>New</h2>
+          <div id="newDiv">
+            <form action="new" method="POST" enctype="multipart/form-data">
+              <table class="tblCenter">
+                <tr><td>Title</td><td><input type="text" id="title" name="title" value="{{ request.form['title'] }}" placeholder="Title" /></td></tr>
+                <tr>
+                  <td>Severity</td>
+                  <td><select id="severity" name="severity" placeholder="Severity" >
+                  {% for i in config.SEVERITY.split(' '): %}
+                    <option value="{{i}}">{{ i }}</option>
+                  {% endfor %}
+                  </select></td>
+                </tr>
+                <tr><td>Description</td><td><textarea id="description" name="description" >{{ request.form['description'] }}</textarea></td></tr>
+                <tr><td></td><td><a href="#" id="newSub">Submit</a></td></tr>
+              </table>
+            </form>
+          </div>
+        </new>
+{% endblock %}
+

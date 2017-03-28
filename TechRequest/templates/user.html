@@ -1,0 +1,47 @@
+{% extends "index.html" %}
+
+{% block user %}
+    {% if '1' in session.admin %}
+        <user>
+          <h2>User</h2>
+          <span><form action="users" method="POST"><a href="/users" id="users" style="text-align:left;">User list</a></form></span></td>
+          <br />
+          <div id="userDiv">
+            <form action="/userupdate" method="post">
+              <table>
+                <tr><td>Login</td><td><input type="text" name="login" id="login" placeholder="Login" value="{{ user[0] }}" readonly /></td></tr>
+                <tr><td>Email</td><td><input type="text" name="email" id="email" placeholder="Email" value="{{ user[1] }}" readonly /></td></tr>
+                <tr><td>Mobil</td><td><input type="text" name="mobil" id="mobil" placeholder="Mobil" value="{{ user[2] }}" /></td></tr>
+                <tr><td>Admin</td><td>
+                  <select id="admin" name="admin" placeholder="Admin" >
+                    {% if user[3] == 1 %}
+                    <option value="1" selected>1</option>
+                    <option value="0" >0</option>
+                    {% else %}
+                    <option value="1" >1</option>
+                    <option value="0" selected>0</option>
+                    {% endif %}
+                  </select>
+                </td></tr>
+                <tr><td>Group</td><td>
+                  <select id="group" name="group" placeholder="Group" >
+                    <option value=""></option>
+                    {% for i in config.GROUP.split(' '): %}
+                      {% if i in user[4] %}
+                    <option value="{{i}}" selected>{{ i }}</option>
+                      {% else %}
+                    <option value="{{i}}">{{ i }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </td></tr>
+                <tr><td></td><td><a href="#" id="userupdate">Update</a></td></tr>
+              </table>
+            </form>
+          </div>
+        </user>
+    {% else %}
+        <span>You're not allowed you access to this feature</span>
+    {% endif %}
+{% endblock %}
+

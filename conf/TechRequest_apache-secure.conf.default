@@ -1,0 +1,49 @@
+<VirtualHost *:443>
+    ServerName ServerName
+    ServerAdmin admin@ServerName
+    ServerSignature Off
+
+    ErrorLog /var/www/TechRequest/log/secure.error.log
+    CustomLog /var/www/TechRequest/log/secure.access.log combined
+    LogLevel info
+
+    AddHandler wsgi-script .wsg
+
+    #WSGIDaemonProcess TechRequest user=www-data group=www-data threads=10 display-name=%{GROUP}
+    WSGIProcessGroup TechRequest
+    WSGIScriptAlias / /var/www/TechRequest/TechRequest.wsgi
+    WSGIScriptReloading On
+
+    <Directory /var/www/TechRequest>
+        WSGIProcessGroup TechRequest
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+	Require all granted
+    </Directory>
+
+        Alias /uploads /var/www/TechRequest/uploads
+        <Directory /var/www/TechRequest/uploads>
+                Order allow,deny
+                Allow from all
+        </Directory>
+        Alias /downloads /var/www/TechRequest/downloads
+        <Directory /var/www/TechRequest/downloads>
+                Order allow,deny
+                Allow from all
+        </Directory>
+
+    # SSL Stuff
+    SSLEngine On
+    SSLCertificateFile /etc/ssl/private/ServerName.com.crt
+    SSLCertificateKeyFile /etc/ssl/private/ServerName.com.key
+    SSLCertificateChainFile /etc/ssl/private/ServerName_intermediate_ca.crt
+    <Location />
+            SSLRequireSSL On
+            SSLVerifyClient optional
+            SSLVerifyDepth 1
+            SSLOptions +StdEnvVars +StrictRequire
+    </Location>
+</VirtualHost>
+
+
