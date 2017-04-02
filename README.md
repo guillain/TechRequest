@@ -18,9 +18,9 @@ Account
 
 Servers
 * Python 2.7
-** flask
-** werkzeug
-** MySQLdb
+* * flask
+* * werkzeug
+* * MySQLdb
 * MySQL
 
 Two web server configurations available
