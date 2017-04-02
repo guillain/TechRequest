@@ -198,7 +198,7 @@ def message():
     try:
         msg = pyCiscoSpark.get_message(api.config['ACCESS_TOKEN'],data.get('id'))
     except Exception as e:
-        wEvent('room','webhook','Get Spark message error','KO')
+        wEvent('message','webhook','Get Spark message error','KO')
         return 'Get Spark message error'
 
     try:

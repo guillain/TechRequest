@@ -3,9 +3,9 @@
 {% block new %}
         <new>
           <h2>New</h2>
-          <div id="newDiv">
+          <div id="newDiv" class="center">
             <form action="new" method="POST" enctype="multipart/form-data">
-              <table class="tblCenter">
+              <table class="center">
                 <tr><td>Title</td><td><input type="text" id="title" name="title" value="{{ request.form['title'] }}" placeholder="Title" /></td></tr>
                 <tr>
                   <td>Severity</td>
