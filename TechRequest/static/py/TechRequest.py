@@ -245,6 +245,7 @@ def user():
 def userSub():
     try:
         sql  = "UPDATE users SET "
+        sql += "  email = '"+request.form['email']+"', "
         sql += "  admin = '"+request.form['admin']+"', "
         sql += "  grp = '"+request.form['group']+"', "
         sql += "  mobile = '"+request.form['mobil']+"' "
