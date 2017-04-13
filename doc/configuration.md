@@ -25,3 +25,20 @@ Two files to split structure and data.
 As you understand structure is in mysql.sql file when data are in the second.
 To initialize your environement thanks to remember to adapt at least one admin user in the data file before injection.
 
+## Spark app
+Create a Cisco Spark app under developper web portal of [Cisco Spark]()
+In your app, add the following 'redirect url'
+* http://[host]/TechRequest/
+* http://[host]/TechRequest/sparkauth
+* http://[host]/TechRequest/room
+* http://[host]/TechRequest/message
+
+Scopes:
+* spark:rooms_read
+* spark:rooms_write
+* spark:membership_read
+* spark:membership_write
+* spark:messages_read
+* spark:messages_write
+
+
