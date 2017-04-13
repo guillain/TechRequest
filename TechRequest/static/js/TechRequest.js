@@ -66,7 +66,7 @@ var dashboardArray = function(val){
   $(function() {
     $('a#dashboardSub').bind('click', function() {
       $.ajax({
-        url: '/dashboard',
+        url: "dashboard",
         data: $('form').serialize(),
         type: 'POST',
         success: function(data) {
@@ -92,7 +92,7 @@ var dashboardArray = function(val){
   $(function() {
     $('a#updateSub').bind('click', function() {
         $.ajax({
-            url: '/updateSub',
+            url: 'updateSub',
             data: $('form').serialize(),
             type: 'POST',
             success: function(data) {
@@ -109,7 +109,7 @@ var dashboardArray = function(val){
   $(function() {
     $('a#newSub').bind('click', function() {
         $.ajax({
-            url: '/newSub',
+            url: 'newSub',
             data: $('form').serialize(),
             type: 'POST',
             success: function(data) {
@@ -126,7 +126,7 @@ var dashboardArray = function(val){
   $(function() {
     $('a#userupdate').bind('click', function() {
         $.ajax({
-            url: '/userupdate',
+            url: 'userupdate',
             data: $('form').serialize(),
             type: 'POST',
             success: function(data) {
