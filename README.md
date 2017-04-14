@@ -34,7 +34,7 @@ Two web server configurations available
 * Also useful if we consider that the log function can be adapted for noSQL and data analytics systems
 
 ## HowTo
-* [Setup](doc/setup.md)
+* [Install](doc/install.md)
 * [Configuration](doc/configuration.md)
 
 ## ToDo list

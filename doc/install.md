@@ -18,7 +18,7 @@ You must have also a Cisco Spark account and create application (all for free ;)
 ## Clone localy
 ```bash
 git clone https://github.com/guillain/TechRequest.git
-cd digitalException
+cd TechRequest
 ```
 ### Install the Python requirements
 ```bash
@@ -26,7 +26,6 @@ pip install -r requirements.txt
 ```
 ### Create additionnal folders
 ```bash
-cd TechRequest
 mkdir log downloads uploads
 ```
 ### Configure and set apache configuration
