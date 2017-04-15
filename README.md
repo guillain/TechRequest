@@ -40,4 +40,8 @@ Two web server configurations available
 ## ToDo list
 * [ToDo](doc/todo.md)
 
+## Report bug
+[issues](issues)
 
+
+Have fun ;)
