@@ -33,6 +33,9 @@ Two web server configurations available
 * Log each events and Spark messages and provide permnanent access to the dump and real time replication features (useful for third party integration)
 * Also useful if we consider that the log function can be adapted for noSQL and data analytics systems
 
+## Features
+* [doc/features.md](doc/features.md)
+
 ## HowTo
 * [Install](doc/install.md)
 * [Configuration](doc/configuration.md)
@@ -41,7 +44,7 @@ Two web server configurations available
 * [ToDo](doc/todo.md)
 
 ## Report bug
-[issues](issues)
+* [issues](issues)
 
 
 Have fun ;)
