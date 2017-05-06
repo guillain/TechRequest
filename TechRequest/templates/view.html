@@ -10,7 +10,7 @@
               {% for mess in data['items'] %}
               {% if 'text' in mess %}
               <li id="msg{{ mess['id'] }}" onmouseover="onmouseoveragent(this)" onmouseout="onmouseoutagent(this)">
-                <span>{{ mess['created'] }} : {{ mess['text'] }}</span>
+                <span>{{ mess['created'] }} : {% if 'files' in mess %} <a href="{{ mess['files'] }}">File</a> {% else %} {{ mess['text'] }} {% endif %}</span>
                 <div class="hideme">
                   <ul>
                     <li>From : {{ mess['personEmail'] }}</li>
