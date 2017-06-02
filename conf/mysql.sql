@@ -37,7 +37,7 @@ DROP TABLE IF EXISTS `spaces`;
 CREATE TABLE `spaces` (
   `sid` varchar(80) NOT NULL,
   `uid` int(11) NOT NULL,
-  `name` varchar(32) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `status` varchar(32) DEFAULT NULL,
   `severity` varchar(32) DEFAULT NULL,
   `birthday` date NOT NULL,

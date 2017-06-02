@@ -3,3 +3,5 @@ express
 config
 requests_toolbelt
 logging
+python-logstash
+datetime

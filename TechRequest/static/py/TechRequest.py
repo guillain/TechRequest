@@ -7,9 +7,12 @@
 from flask import Flask, session, redirect, url_for, escape, request
 from flask import render_template, jsonify, send_file
 from werkzeug.utils import secure_filename
-from tools import logger, exeReq, wEvent
+from tools import logger, exeReq, wEvent, sEvent, logstash
 
-import re, os, sys, urllib
+import urllib2
+import json
+
+import re, os, sys, urllib, base64
 import pyCiscoSpark
 
 from flask import Blueprint
@@ -20,10 +23,6 @@ api = Flask(__name__)
 api.config.from_object(__name__)
 api.config.from_envvar('FLASK_SETTING')
 
-# Space log in DB
-def sEvent(msg):
-    return exeReq("INSERT INTO sEvents (sid,uid,msg) VALUES ('"+session['sid']+"', '"+session['uid']+"', '"+msg+"');")
-
 # Dashboard ---------------------------------------
 @techreq_api.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
@@ -32,11 +31,11 @@ def dashboard():
         if session['admin'] == '1':
             sql  = "SELECT 'admin', s.sid, s.name, 'list', DATE_FORMAT(s.birthday, '%Y-%m-%d'), "
             sql += "DATE_FORMAT(s.timestamp, '%Y-%m-%d %H:%i'), s.severity, s.status "
-            sql += "FROM spaces s, users u WHERE u.uid = s.uid AND s.status NOT LIKE '%close%' GROUP BY s.name ORDER BY s.name;"
+            sql += "FROM spaces s, users u WHERE u.uid = s.uid AND u.uid != '1' AND s.status NOT LIKE '%close%' GROUP BY s.name ORDER BY s.name;"
         else:
             sql  = "SELECT '"+session['grp']+"', s.sid, s.name, 'Me', "
             sql += "DATE_FORMAT(s.birthday, '%Y-%m-%d'), DATE_FORMAT(s.timestamp, '%Y-%m-%d %H:%i'), s.severity, s.status "
-            sql += "FROM spaces s WHERE s.uid = '"+session['uid']+"' AND s.status NOT LIKE '%close%' ORDER BY s.name;" 
+            sql += "FROM spaces s WHERE s.uid = '"+session['uid']+"' AND u.uid != '1' AND s.status NOT LIKE '%close%' ORDER BY s.name;" 
         try:
             spaces = exeReq(sql)
         except Exception as e:
@@ -77,7 +76,6 @@ def newSub():
         space = pyCiscoSpark.post_room(api.config['ACCESS_TOKEN'],title)
         session['sid'] = space['id']
         session['sname'] = title
-
         sEvent('creation')
         wEvent('newSub',session['uid'],"Space created, id: "+space['id'],'OK')
     except Exception as e:
@@ -86,8 +84,8 @@ def newSub():
 
     # Create webhook
     try:
-        webhook = pyCiscoSpark.post_webhook(api.config['ACCESS_TOKEN'], title, api.config['SPARK_WEBHOOK']+'/message', 'messages', 'all', str('roomId='+space['id']))
-        webhook = pyCiscoSpark.post_webhook(api.config['ACCESS_TOKEN'], title, api.config['SPARK_WEBHOOK']+'/room', 'rooms', 'all', str('roomId='+space['id']))
+        webhookmsg = pyCiscoSpark.post_webhook(api.config['ACCESS_TOKEN'], title, api.config['SPARK_WEBHOOK']+'/message', 'messages', 'all', str('roomId='+space['id']))
+        exeReq("INSERT INTO spaces VALUES ('"+space['id']+"','1','"+webhookmsg['id']+"','open', '', CURDATE(), NOW());")
         wEvent('newSub',session['uid'],"Webhook created, space id: "+space['id'],'OK')
     except Exception as e:
         wEvent('newSub',session['uid'],"Issue during webhook space creation, name: "+title,'KO')
@@ -102,7 +100,7 @@ def newSub():
     for user in member_list:
         try:
             pyCiscoSpark.post_roommembership(api.config['ACCESS_TOKEN'],space['id'],user[0],user[3])
-            space_member = exeReq("INSERT INTO spaces VALUES ('"+space['id']+"','"+str(user[1])+"','"+title+"','open', '"+severity+"', CURDATE(), NOW());")
+            exeReq("INSERT INTO spaces VALUES ('"+space['id']+"','"+str(user[1])+"','"+title+"','open', '"+severity+"', CURDATE(), NOW());")
             sEvent('Membership added:'+user[0])
             wEvent('newSub',session['uid'],"User "+user[0]+" add to the space "+title,'OK')
         except Exception as e:
@@ -153,7 +151,7 @@ def updateSub():
         if severity:
             msg += '\n- Severity: ' + severity
             try:
-                update = exeReq("UPDATE spaces SET severity = '"+severity+"' WHERE sid = '"+session['sid']+"';")
+                exeReq("UPDATE spaces SET severity = '"+severity+"' WHERE sid = '"+session['sid']+"';")
             except Exception as e:
                 wEvent('updateSub',session['uid'],'Issue during severity update in local DB','KO')
     except Exception as e:
@@ -192,8 +190,9 @@ def updateSub():
 # Bot messages ----------------------------------------------------------
 @techreq_api.route('/message', methods=['POST'])
 def message():
-    json = request.json
-    data = json.get('data')
+    print 'message received'
+    jso = json.loads(request.data)
+    data = jso.get('data')
 
     try:
         msg = pyCiscoSpark.get_message(api.config['ACCESS_TOKEN'],data.get('id'))
@@ -202,33 +201,12 @@ def message():
         return 'Get Spark message error'
 
     try:
-        new_msg = exeReq("INSERT INTO sEvents SET sid = '"+json.get('id')+"', msg = '"+msg.get('text')+"', uid = '0';")
-        wEvent('message','webhook','Messages stored locally','KO')
+        exeReq("INSERT INTO sEvents SET sid = '"+data.get('roomId')+"', msg = '"+msg.get('text')+"', uid = '0';")
+        logstash('bot',msg)
+        wEvent('message','webhook','Messages stored locally','OK')
         return 'Message stored locally'
     except Exception as e:
         wEvent('message','webhook','Database error (put msg data)','KO')
-        return 'Database error (put msg data)'
-
-@techreq_api.route('/room', methods=['POST'])
-def room():
-    json = request.json
-    print json
-
-    data = json.get('data')
-    print data
-
-    try:
-        msg = pyCiscoSpark.get_message(api.config['ACCESS_TOKEN'],data.get('id'))
-    except Exception as e:
-        wEvent('room','webhook','Get Spark message error','KO')
-        return 'Get Spark message error'
-
-    try:
-        new_msg = exeReq("INSERT INTO sEvents SET sid = '"+json.get('id')+"', msg = '"+msg.get('text')+"', uid = '0';")
-        wEvent('room','webhook','Room update stored locally','KO')
-        return 'Room update stored locally'
-    except Exception as e:
-        wEvent('room','webhook','Database error (put msg data)','KO')
         return 'Database error (put msg data)'
 
 # User ------------------------------------------
@@ -266,7 +244,7 @@ def userSub():
 @techreq_api.route('/users', methods=['POST', 'GET'])
 def users():
     try:
-        users = exeReq("SELECT login,email,admin,grp FROM users;")
+        users = exeReq("SELECT login,email,admin,grp FROM users WHERE uid != '1';")
         return render_template('users.html', users = users)
     except Exception as e:
         wEvent('users','webhook','Get user list error','KO')
@@ -292,7 +270,7 @@ def view():
     wEvent('view',session['uid'],"Space viewed, id: "+session['sid'],'OK')
     return render_template('view.html', data=msg_dict)
   except Exception as e:
-    wEvent('view',session['uid'],str("Issue during space message listing, id "+session['sid']),'KO')
+    wEvent('view',session['uid'],str("Issue to list the messages, id "+session['sid']),'KO')
     return 'Issue during space message listing'
 
 # Close ------------------------------------------------------------------
@@ -305,13 +283,20 @@ def close():
   session['sname'] = request.form['sname']
   session['sid'] = request.form['sid']
   try:
-    space = pyCiscoSpark.del_room(api.config['ACCESS_TOKEN'],session['sid'])
-    spaces = exeReq("UPDATE spaces SET status = 'close' WHERE sid = '"+session['sid']+"';")
+    # Delete webhook
+    webhook = exeReq("SELECT name FROM spaces WHERE uid = '1' AND sid = '" + session['sid'] + "';")
+    web = pyCiscoSpark.del_webhook(api.config['ACCESS_TOKEN'],webhook[0][0])
+
+    # Delete room
+    pyCiscoSpark.del_room(api.config['ACCESS_TOKEN'],session['sid'])
+    exeReq("UPDATE spaces SET status = 'close' WHERE sid = '"+session['sid']+"';")
+
+    # Log
     sEvent('closure')
     wEvent('close',session['uid'],"Space closed, id: "+session['sid'],'OK')
     return render_template('new.html')
   except Exception as e:
-    wEvent('close',session['uid'],str("Issue during space closure, id "+session['sid']),'KO')
+    wEvent('close',session['uid'],str("Issue to close the space, id "+session['sid']),'KO')
     return 'Issue during space closure'
 
 # Dump -------------------------------------------------------------------
@@ -329,13 +314,36 @@ def dump():
     msg_dict = pyCiscoSpark.get_messages(api.config['ACCESS_TOKEN'],session['sid']) 
     sEvent('dump')
   except Exception as e:
-    wEvent('dump',session['uid'],"Issue during the dump of the space "+session['sid'],'KO')
+    wEvent('dump',session['uid'],"Issue to dump the space "+session['sid'],'KO')
+
+  # Get file from message
+  try:
+    for msg in msg_dict['items']:
+      if 'files' in msg:
+        fileurl = str(msg['files'])
+        fileurl = fileurl.replace("[u'https://api.ciscospark.com/v1/contents/", "")
+        fileurl = fileurl.replace("']","")
+
+        response = pyCiscoSpark.get_content(api.config['ACCESS_TOKEN'],fileurl)
+        content_disp = response.headers.get('Content-Disposition', None)
+
+        if content_disp is not None:
+          filename = content_disp.split("filename=")[1]
+          filename = filename.replace('"', '')
+          with open(filename, 'w') as f:
+            f.write(response.read())
+            print 'Saved-', filename
+        else:
+          print "Cannot save file- no Content-Disposition header received."
+
+  except Exception as e:
+    wEvent('dump',session['uid'],"Issue to get file in message "+session['sid'],'KO')
 
   # Dump the database
   try:
     database = exeReq("Select * FROM spaces s, sEvents e WHERE s.sid = '"+session['sid']+"' AND e.sid = '"+session['sid']+"';")
   except Exception as e:
-    wEvent('dump',session['uid'],"Issue during the dump of the space "+session['sid'],'KO')
+    wEvent('dump',session['uid'],"Issue to dump the database "+session['sid'],'KO')
 
   # Write data into single CSV file
   msg = 'TechRequest Dump generation for the Space:'+session['sid']
@@ -346,7 +354,7 @@ def dump():
     with open(api.config['DOWNLOAD_FOLDER']+session['sid']+".csv","wb") as fo:
       fo.write(msg)
   except Exception as e:
-    wEvent('dump',session['uid'],str("Issue during file creation to dump the space "+session['sid']),'KO')
+    wEvent('dump',session['uid'],str("Issue to create the file "+session['sid']),'KO')
 
   wEvent('dump',session['uid'],"Space dumped, id: "+session['sid'],'OK')
   return send_file(api.config['DOWNLOAD_FOLDER']+session['sid']+".csv")

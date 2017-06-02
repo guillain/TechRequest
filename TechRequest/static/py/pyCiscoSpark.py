@@ -186,6 +186,11 @@ def get_message(at, messageId):
     resp = requests.get(_url('/messages/{:s}'.format(messageId)), headers=headers)
     return code(resp)
 
+def get_content(at, contentId):
+    headers = {'Authorization': _fix_at(at)}
+    resp = requests.get(_url('/contents/{:s}'.format(contentId)), headers=headers)
+    return code(resp)
+
 def get_webhooks(at):
     headers = {'Authorization': _fix_at(at)}
     resp = requests.get(_url('/webhooks'), headers=headers)
