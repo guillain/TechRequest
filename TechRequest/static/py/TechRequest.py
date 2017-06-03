@@ -28,6 +28,11 @@ api.config.from_envvar('FLASK_SETTING')
 def dashboard():
     error = None
     if request.method == 'POST':
+        # Set timer session value cming from the web
+        session['timer'] = request.form['timer'];
+        print 'timer: ' + session['timer']
+
+        # Get data according to the admin priv
         if session['admin'] == '1':
             sql  = "SELECT 'admin', s.sid, s.name, 'list', DATE_FORMAT(s.birthday, '%Y-%m-%d'), "
             sql += "DATE_FORMAT(s.timestamp, '%Y-%m-%d %H:%i'), s.severity, s.status "

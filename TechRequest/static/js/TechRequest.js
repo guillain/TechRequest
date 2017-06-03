@@ -63,14 +63,12 @@ var dashboardArray = function(val){
               return buffer;
 }
 
-  $(function() {
-    $('a#dashboardSub').bind('click', function() {
+  function dashboardUpdate(){
       $.ajax({
         url: "dashboard",
         data: $('form').serialize(),
         type: 'POST',
         success: function(data) {
-          console.log(data);
           var buffer="";
           $.each(data, function(index, val){
             if (val.length == 0) {
@@ -79,15 +77,22 @@ var dashboardArray = function(val){
               $('#dashboardRes').html(dashboardArray(val));
             }
           });
+          if( (document.getElementById("timer").value != '0') && (document.getElementById("timer").value != '') ) {
+            setTimeout(dashboardUpdate, document.getElementById("timer").value * 1000);
+          }
         },
         error: function(error) {
           console.log(error);
           $("#result").text(error);
         }
       });
+  }
+  $(function() {
+    $('a#dashboardSub').bind('click', function() {
+      dashboardUpdate();
     });
   });
-
+  
 /* updateSub click */
   $(function() {
     $('a#updateSub').bind('click', function() {
