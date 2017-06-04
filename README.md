@@ -11,6 +11,7 @@ The scenario can be describe like that :
 * Automatically: the Spark room (Space) is created, the AirLine, Field Representative and Expert are associated to this Space. 
 * The Expert works on the folder with the Field Representative support and communicate through the file sharing, webex and video conferencing, white board and chat provided by the Space.
 * At the end of the folder process, only the admin can close the folder and the dump of the Space stay available via the Web form.
+![](doc/workflow.png)
 
 ## Requirements
 Account
@@ -35,6 +36,8 @@ Two web server configurations available
 
 ## Features
 * [doc/features.md](doc/features.md)
+* Chatbot: ![](doc/chatbot.png)
+* Analytics: ![](doc/analytics.png)
 
 ## HowTo
 * [Install](doc/install.md)
