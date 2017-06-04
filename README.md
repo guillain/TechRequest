@@ -36,7 +36,7 @@ Two web server configurations available
 
 ## Features
 * [doc/features.md](doc/features.md)
-* Chatbot: ![](doc/chatbot.png)
+* Chatbot: <img src="doc/chatbot.png" height="300px">
 * Analytics: ![](doc/analytics.png)
 
 ## HowTo
